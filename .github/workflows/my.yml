@@ -1,29 +1,27 @@
-name: Deploy to Koyeb
+name: CI
 
-on:
-  push:
-    branches:
-      - main
+on: [push, workflow_dispatch]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Build and push Docker image
+    - name: Setup RDP
       run: |
-        docker build -t your-docker-image-name .
-        echo $KOYEB_API_KEY | docker login -u _ --password-stdin registry.koyeb.com
-        docker tag your-docker-image-name registry.koyeb.com/your-koyeb-app-name/your-docker-image-name
-        docker push registry.koyeb.com/your-koyeb-app-name/your-docker-image-name
-      env:
-        KOYEB_API_KEY: r68hrua7pduys3op6ztkjdot37q64g46ubkp0ja8k5xvbi5we0zbv7nusf16lue3
-
-    - name: Deploy to Koyeb
-      run: |
-        curl -X POST https://api.koyeb.com/v1/services/your-koyeb-app-name/deployments \
-        -H "Authorization: Bearer $KOYEB_API_KEY" \
-        -H "Content-Type: application/json" \
-        -d '{"docker_image": "registry.koyeb.com/your-koyeb-app-name/your-docker-image-name"}'
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends ubuntu-desktop
+        sudo apt-get install -y --no-install-recommends xrdp
+        sudo adduser xrdp ssl-cert
+        sudo systemctl enable xrdp
+        sudo systemctl start xrdp
+        echo "runneradmin:P@ssw0rd!" | sudo chpasswd
+        sudo sed -i 's/allowed_users=console/allowed_users=anybody/' /etc/X11/Xwrapper.config
+    - name: Download ngrok
+      run: wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip
+    - name: Extract ngrok
+      run: unzip ngrok.zip
+    - name: Auth ngrok
+      run: ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Start ngrok tunnel
+      run: ./ngrok tcp 3389 --region=us --authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
