@@ -28,5 +28,10 @@ jobs:
           sudo dscl . -passwd /Users/runneradmin P@ssw0rd!
           sudo createhomedir -c -u runneradmin > /dev/null
         fi
+    - name: Configure Firewall
+      run: |
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/libexec/sshd-keygen-wrapper
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp /usr/libexec/sshd-keygen-wrapper
     - name: Create Tunnel
       run: ./ngrok tcp 3389
