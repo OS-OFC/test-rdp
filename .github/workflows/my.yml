@@ -7,30 +7,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Setup Android Environment
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget tar unzip lib32stdc++6 lib32z1
-        wget https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
-        tar -xvzf android-sdk_r24.4.1-linux.tgz
-        echo "ANDROID_HOME=$HOME/android-sdk-linux" >> $GITHUB_ENV
-        echo "PATH=$PATH:$HOME/android-sdk-linux/platform-tools:$HOME/android-sdk-linux/tools" >> $GITHUB_ENV
-        wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
-        unzip platform-tools-latest-linux.zip -d $HOME/android-sdk-linux
-        wget https://dl.google.com/android/repository/build-tools_r29.0.2-linux.zip
-        unzip build-tools_r29.0.2-linux.zip -d $HOME/android-sdk-linux/build-tools
-        echo "y" | $HOME/android-sdk-linux/tools/android update sdk --no-ui --all --filter platform-tools,build-tools-29.0.2,android-29,extra-android-m2repository
-        echo "y" | $HOME/android-sdk-linux/tools/android update sdk --no-ui --all --filter extra-google-google_play_services
-    - name: Start Android Emulator
-      run: |
-        echo "no" | $HOME/android-sdk-linux/tools/android create avd --force --name test --target android-29 --abi google_apis/x86
-        $HOME/android-sdk-linux/tools/emulator -avd test -no-audio -no-window &
-        $HOME/android-sdk-linux/platform-tools/adb wait-for-device
-    - name: Download ngrok
+    - name: Download
       run: wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip
-    - name: Extract ngrok
+    - name: Extract
       run: unzip ngrok.zip
-    - name: Auth ngrok
+    - name: Auth
       run: ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-    - name: Start ngrok tunnel
-      run: ./ngrok tcp 5037 --region=us --authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Create Tunnel
+      run: ./ngrok tcp 22
