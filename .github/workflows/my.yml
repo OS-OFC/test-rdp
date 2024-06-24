@@ -8,12 +8,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install xrdp
+    - name: Install Desktop Environment and xrdp
       run: |
         sudo apt-get update
-        sudo apt-get install -y xrdp
+        sudo apt-get install -y xrdp xfce4 xfce4-goodies
+        echo xfce4-session > ~/.xsession
         sudo systemctl enable xrdp
         sudo systemctl start xrdp
+        sudo bash -c 'echo -e "#!/bin/sh\n\nif [ -r /etc/default/locale ]; then\n  . /etc/default/locale\n  export LANG LANGUAGE\nfi\n\nstartxfce4" > /etc/xrdp/startwm.sh'
     - name: Set up user password
       run: echo 'runner:P@ssw0rd!' | sudo chpasswd
     - name: Download ngrok
